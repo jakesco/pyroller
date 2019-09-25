@@ -23,10 +23,9 @@ def validate(D):
 def init_argparser():
     # init argparser
     parser = argparse.ArgumentParser()
-    parser.add_argument('dice', metavar='D', type=str, nargs='+', help='Dice to be rolled (e.g. d20 or 2d6)')
+    parser.add_argument('dice', metavar='D', type=str, nargs='*', help='Dice to be rolled (e.g. d12, 2d6, etc). A d20 will be rolled if no arguments given.')
     parser.add_argument('-V', '--version', action='version', version='pyroller version {}'.format(VERSION))
     parser.add_argument('-v', '--verbose', help='show all dice rolls', action='store_true')
-    # TODO: implement 'modifier' option
     parser.add_argument('-m', '--modifier', type=int, nargs=1, help='adds MODIFIER to result', action='store')
 
     # read arguments form command line
@@ -39,18 +38,17 @@ def main():
 
     rolls = []
 
-    if args.modifier:
-        print(args.modifier[0])
+    if len(args.dice) < 1:
+        args.dice = ['d20']
 
     for die in args.dice:
         if args.verbose:
             print('Rolling {}...'.format(die))
 
-        n = die.split('d')[0]
-        d = int(die.split('d')[1])
+        n, d = die.split('d')
 
         for i in range(0, int(n) if n else 1):
-            tmp = roll(d)
+            tmp = roll(int(d))
             if args.verbose:
                 print(tmp, end = " ")
             rolls.append(tmp)
@@ -58,9 +56,14 @@ def main():
         if args.verbose:
             print()
 
+    total = sum(rolls)
+
+    if args.modifier:
+        total += args.modifier[0]
+
     if args.verbose:
         print("Total:")
-    print(sum(rolls))
+    print(total)
 
 if __name__ == "__main__":
     main()
